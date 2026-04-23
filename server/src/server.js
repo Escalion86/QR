@@ -114,6 +114,17 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "qr-api", timestamp: new Date().toISOString() });
 });
 
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    service: "qr-api",
+    status: "ok",
+    message: "API is running.",
+    docs: "/docs",
+    health: "/health",
+    generate: "/api/v1/qr/generate",
+  });
+});
+
 /**
  * @swagger
  * /api/v1/qr/types:
