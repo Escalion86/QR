@@ -11,6 +11,7 @@ Health check: `GET /health`
 ## Quick Start
 
 ```bash
+cd server
 npm install
 npm start
 ```
@@ -18,6 +19,7 @@ npm start
 Optional port:
 
 ```bash
+cd server
 PORT=3101 npm start
 ```
 
@@ -192,4 +194,3 @@ Errors return HTTP `400` and JSON:
   "error": "Field \"type\" is required."
 }
 ```
-

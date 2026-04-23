@@ -1,59 +1,57 @@
-## QR Generator API (Express)
+# QR Project
 
-API for generating PNG QR codes for internal services.
+Project split into two parts:
 
-### Features
+- `server/` - Express API for QR generation
+- `client/` - simple browser client for testing API requests
 
-- QR generation via HTTP API (`POST /api/v1/qr/generate`)
-- Supported payload types:
-  - `text`
-  - `url`
-  - `email`
-  - `phone`
-  - `sms`
-  - `wifi`
-  - `vcard`
-  - `geo`
-  - `event`
-  - `whatsapp`
-- PNG output only
-- Configurable resolution (`resolutionPreset` or `width`)
-- Configurable margin, error correction, dark/light colors
-- Optional center logo from URL or Base64 data URL
-- Swagger docs at `/docs`
+## Structure
 
-### Run
+```text
+QR/
+  server/
+    src/
+    package.json
+  client/
+    index.html
+    main.js
+    styles.css
+  doc/
+    API.md
+```
+
+## Server Run
 
 ```bash
+cd server
 npm install
 npm start
 ```
 
-Service URLs:
+Server URLs:
 
-- Health: `GET /health`
-- Types: `GET /api/v1/qr/types`
-- Generate: `POST /api/v1/qr/generate`
-- Docs: `GET /docs`
+- API: `http://localhost:3000/api/v1/qr/generate`
+- Types: `http://localhost:3000/api/v1/qr/types`
+- Health: `http://localhost:3000/health`
+- Swagger: `http://localhost:3000/docs`
 
-### Example request
+## Client Run
+
+Simplest way:
+
+1. Start server (`cd server && npm start`)
+2. Open `client/index.html` in browser
+3. Fill parameters and click `Generate QR`
+
+If you prefer local static server for client:
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/qr/generate \
-  -H "Content-Type: application/json" \
-  --output qr.png \
-  -d '{
-    "type": "url",
-    "data": {
-      "url": "https://example.com"
-    },
-    "options": {
-      "resolutionPreset": "high",
-      "margin": 2,
-      "errorCorrectionLevel": "M",
-      "colorDark": "#111111",
-      "colorLight": "#ffffff"
-    }
-  }'
+cd client
+python -m http.server 8080
 ```
-# QR
+
+Then open `http://localhost:8080`.
+
+## API Docs
+
+Detailed API documentation is in [doc/API.md](doc/API.md).

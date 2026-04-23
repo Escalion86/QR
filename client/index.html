@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Client</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>QR API Client</h1>
+      <p class="hint">Simple UI for sending parameters to the server and getting PNG response.</p>
+
+      <form id="qr-form" class="form">
+        <label>
+          API URL
+          <input id="api-url" type="text" value="http://localhost:3000/api/v1/qr/generate" />
+        </label>
+
+        <label>
+          Type
+          <select id="type">
+            <option value="url" selected>url</option>
+            <option value="text">text</option>
+            <option value="email">email</option>
+            <option value="phone">phone</option>
+            <option value="sms">sms</option>
+            <option value="wifi">wifi</option>
+            <option value="vcard">vcard</option>
+            <option value="geo">geo</option>
+            <option value="event">event</option>
+            <option value="whatsapp">whatsapp</option>
+          </select>
+        </label>
+
+        <label>
+          Data (JSON)
+          <textarea id="data-json" rows="8">{
+  "url": "https://example.com"
+}</textarea>
+        </label>
+
+        <label>
+          Options (JSON)
+          <textarea id="options-json" rows="10">{
+  "resolutionPreset": "high",
+  "margin": 2,
+  "errorCorrectionLevel": "M",
+  "colorDark": "#111111",
+  "colorLight": "#ffffff"
+}</textarea>
+        </label>
+
+        <button type="submit">Generate QR</button>
+      </form>
+
+      <p id="status" class="status"></p>
+
+      <section id="result" class="result hidden">
+        <h2>Result</h2>
+        <img id="qr-image" alt="Generated QR" />
+        <a id="download-link" download="qr.png">Download PNG</a>
+      </section>
+    </main>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
+
