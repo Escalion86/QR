@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const QRCode = require("qrcode");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJSDoc = require("swagger-jsdoc");
@@ -9,6 +11,8 @@ const { downloadLogoBuffer } = require("./services/logo");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const CLIENT_DIR = path.resolve(__dirname, "../../client");
+const CLIENT_INDEX = path.join(CLIENT_DIR, "index.html");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -114,7 +118,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "qr-api", timestamp: new Date().toISOString() });
 });
 
-app.get("/", (_req, res) => {
+app.get("/api/v1/info", (_req, res) => {
   res.status(200).json({
     service: "qr-api",
     status: "ok",
@@ -123,6 +127,17 @@ app.get("/", (_req, res) => {
     health: "/health",
     generate: "/api/v1/qr/generate",
   });
+});
+
+if (fs.existsSync(CLIENT_DIR)) {
+  app.use(express.static(CLIENT_DIR));
+}
+
+app.get("/", (_req, res) => {
+  if (fs.existsSync(CLIENT_INDEX)) {
+    return res.sendFile(CLIENT_INDEX);
+  }
+  return res.redirect("/docs");
 });
 
 /**
