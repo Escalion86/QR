@@ -6,6 +6,16 @@ const downloadLink = document.getElementById("download-link");
 const typeElement = document.getElementById("type");
 const inputElement = document.getElementById("data-input");
 const formatHelpElement = document.getElementById("format-help");
+const resolutionPresetElement = document.getElementById("resolution-preset");
+const errorLevelElement = document.getElementById("error-level");
+const marginElement = document.getElementById("margin");
+const colorDarkElement = document.getElementById("color-dark");
+const colorLightElement = document.getElementById("color-light");
+const logoUrlElement = document.getElementById("logo-url");
+const logoFileElement = document.getElementById("logo-file");
+const logoSizeRatioElement = document.getElementById("logo-size-ratio");
+const logoPaddingElement = document.getElementById("logo-padding");
+const logoBgColorElement = document.getElementById("logo-bg-color");
 
 const TYPE_HELP = {
   text: "Формат: любой текст",
@@ -108,6 +118,47 @@ function applyTypeHelp(type) {
   formatHelpElement.textContent = TYPE_HELP[type] || "";
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Не удалось прочитать файл логотипа."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function buildOptions() {
+  const options = {
+    resolutionPreset: resolutionPresetElement.value,
+    margin: Number(marginElement.value || 2),
+    errorCorrectionLevel: errorLevelElement.value,
+    colorDark: colorDarkElement.value,
+    colorLight: colorLightElement.value,
+  };
+
+  const logoUrl = String(logoUrlElement.value || "").trim();
+  const logoFile = logoFileElement.files && logoFileElement.files[0] ? logoFileElement.files[0] : null;
+  const sizeRatio = Number(logoSizeRatioElement.value || 0.2);
+  const padding = Number(logoPaddingElement.value || 8);
+  const backgroundColor = logoBgColorElement.value;
+
+  if (logoUrl || logoFile) {
+    options.logo = {
+      sizeRatio,
+      padding,
+      backgroundColor,
+    };
+
+    if (logoFile) {
+      options.logo.base64 = await readFileAsDataUrl(logoFile);
+    } else {
+      options.logo.url = logoUrl;
+    }
+  }
+
+  return options;
+}
+
 typeElement.addEventListener("change", () => {
   const type = typeElement.value;
   inputElement.value = TYPE_DEFAULT_INPUT[type] || "";
@@ -128,7 +179,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const data = buildDataByType(type, input);
-    const options = { resolutionPreset: "high", margin: 2, errorCorrectionLevel: "M" };
+    const options = await buildOptions();
     const body = { type, data, options };
 
     const response = await fetch(apiUrl, {
