@@ -8,15 +8,10 @@
   </head>
   <body>
     <main class="container">
-      <h1>QR API Client</h1>
-      <p class="hint">Simple UI for sending parameters to the server and getting PNG response.</p>
+      <h1>QR Generator</h1>
+      <p class="hint">Выбери тип и введи данные в одном поле.</p>
 
       <form id="qr-form" class="form">
-        <label>
-          API URL
-          <input id="api-url" type="text" value="http://localhost:3000/api/v1/qr/generate" />
-        </label>
-
         <label>
           Type
           <select id="type">
@@ -34,22 +29,11 @@
         </label>
 
         <label>
-          Data (JSON)
-          <textarea id="data-json" rows="8">{
-  "url": "https://example.com"
-}</textarea>
+          Data
+          <textarea id="data-input" rows="5">https://example.com</textarea>
         </label>
 
-        <label>
-          Options (JSON)
-          <textarea id="options-json" rows="10">{
-  "resolutionPreset": "high",
-  "margin": 2,
-  "errorCorrectionLevel": "M",
-  "colorDark": "#111111",
-  "colorLight": "#ffffff"
-}</textarea>
-        </label>
+        <p id="format-help" class="help"></p>
 
         <button type="submit">Generate QR</button>
       </form>
@@ -63,7 +47,7 @@
       </section>
     </main>
 
+    <script src="/client-config.js"></script>
     <script src="./main.js"></script>
   </body>
 </html>
-

@@ -129,6 +129,14 @@ app.get("/api/v1/info", (_req, res) => {
   });
 });
 
+app.get("/client-config.js", (_req, res) => {
+  const publicBaseUrl = String(process.env.PUBLIC_BASE_URL || "").trim().replace(/\/+$/, "");
+  const payload = `window.__APP_CONFIG__ = ${JSON.stringify({ publicBaseUrl })};`;
+  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store");
+  res.send(payload);
+});
+
 if (fs.existsSync(CLIENT_DIR)) {
   app.use(express.static(CLIENT_DIR));
 }

@@ -3,19 +3,118 @@ const statusElement = document.getElementById("status");
 const resultElement = document.getElementById("result");
 const imageElement = document.getElementById("qr-image");
 const downloadLink = document.getElementById("download-link");
+const typeElement = document.getElementById("type");
+const inputElement = document.getElementById("data-input");
+const formatHelpElement = document.getElementById("format-help");
+
+const TYPE_HELP = {
+  text: "Формат: любой текст",
+  url: "Формат: https://example.com",
+  email: "Формат: email|subject|body",
+  phone: "Формат: +79990000000",
+  sms: "Формат: phone|message",
+  wifi: "Формат: ssid|password|WPA|false",
+  vcard: "Формат: fullName|phone|email|organization|title|url|address|note",
+  geo: "Формат: lat,lng (например 55.7558,37.6176)",
+  event: "Формат: title|startISO|endISO|location|description",
+  whatsapp: "Формат: phone|message",
+};
+
+const TYPE_DEFAULT_INPUT = {
+  text: "Hello QR",
+  url: "https://example.com",
+  email: "user@example.com|Hello|Message",
+  phone: "+79990000000",
+  sms: "+79990000000|Hello",
+  wifi: "MyWiFi|supersecret|WPA|false",
+  vcard: "John Smith|+79990000000|john@example.com|My Co|CEO|https://example.com|City, Street|Contact",
+  geo: "55.7558,37.6176",
+  event: "Meeting|2026-05-01T10:00:00Z|2026-05-01T11:00:00Z|Office|Weekly sync",
+  whatsapp: "79990000000|Hello",
+};
 
 function setStatus(message, isError = false) {
   statusElement.textContent = message;
   statusElement.classList.toggle("error", isError);
 }
 
-function parseJsonField(rawValue, fieldName) {
-  try {
-    return JSON.parse(rawValue);
-  } catch (_error) {
-    throw new Error(`Invalid JSON in "${fieldName}".`);
+function splitByPipe(value) {
+  return String(value)
+    .split("|")
+    .map((part) => part.trim());
+}
+
+function buildDataByType(type, rawInput) {
+  const input = String(rawInput || "").trim();
+  if (!input) {
+    throw new Error("Поле Data не может быть пустым.");
+  }
+
+  switch (type) {
+    case "text":
+      return { value: input };
+    case "url":
+      return { url: input };
+    case "email": {
+      const [email, subject = "", body = ""] = splitByPipe(input);
+      return { email, subject, body };
+    }
+    case "phone":
+      return { phone: input };
+    case "sms": {
+      const [phone, message = ""] = splitByPipe(input);
+      return { phone, message };
+    }
+    case "wifi": {
+      const [ssid, password = "", security = "WPA", hidden = "false"] = splitByPipe(input);
+      return { ssid, password, security, hidden: hidden.toLowerCase() === "true" };
+    }
+    case "vcard": {
+      const [fullName, phone = "", email = "", organization = "", title = "", url = "", address = "", note = ""] =
+        splitByPipe(input);
+      return { fullName, phone, email, organization, title, url, address, note };
+    }
+    case "geo": {
+      const [latRaw, lngRaw] = input.split(",");
+      const lat = Number(String(latRaw || "").trim());
+      const lng = Number(String(lngRaw || "").trim());
+      if (Number.isNaN(lat) || Number.isNaN(lng)) {
+        throw new Error("Для geo используй формат lat,lng.");
+      }
+      return { lat, lng };
+    }
+    case "event": {
+      const [title, start, end, location = "", description = ""] = splitByPipe(input);
+      return { title, start, end, location, description };
+    }
+    case "whatsapp": {
+      const [phone, text = ""] = splitByPipe(input);
+      return { phone, text };
+    }
+    default:
+      throw new Error(`Unsupported type: ${type}`);
   }
 }
+
+function resolveApiUrl() {
+  const publicBaseUrl = window.__APP_CONFIG__?.publicBaseUrl || "";
+  if (publicBaseUrl) {
+    return `${publicBaseUrl}/api/v1/qr/generate`;
+  }
+  return "/api/v1/qr/generate";
+}
+
+function applyTypeHelp(type) {
+  formatHelpElement.textContent = TYPE_HELP[type] || "";
+}
+
+typeElement.addEventListener("change", () => {
+  const type = typeElement.value;
+  inputElement.value = TYPE_DEFAULT_INPUT[type] || "";
+  applyTypeHelp(type);
+});
+
+applyTypeHelp(typeElement.value);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -23,14 +122,13 @@ form.addEventListener("submit", async (event) => {
   setStatus("Generating...");
   resultElement.classList.add("hidden");
 
-  const apiUrl = document.getElementById("api-url").value.trim();
-  const type = document.getElementById("type").value;
-  const dataRaw = document.getElementById("data-json").value;
-  const optionsRaw = document.getElementById("options-json").value;
+  const apiUrl = resolveApiUrl();
+  const type = typeElement.value;
+  const input = inputElement.value;
 
   try {
-    const data = parseJsonField(dataRaw, "Data");
-    const options = parseJsonField(optionsRaw, "Options");
+    const data = buildDataByType(type, input);
+    const options = { resolutionPreset: "high", margin: 2, errorCorrectionLevel: "M" };
     const body = { type, data, options };
 
     const response = await fetch(apiUrl, {
@@ -57,4 +155,3 @@ form.addEventListener("submit", async (event) => {
     setStatus(error.message || "Failed to generate QR.", true);
   }
 });
-

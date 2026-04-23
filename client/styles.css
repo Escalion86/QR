@@ -81,6 +81,12 @@ button:hover {
   color: #1d7a1d;
 }
 
+.help {
+  margin: 0;
+  font-size: 13px;
+  color: #5e6c7a;
+}
+
 .status.error {
   color: #a82020;
 }
@@ -112,4 +118,3 @@ button:hover {
 .hidden {
   display: none;
 }
-

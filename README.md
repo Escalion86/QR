@@ -35,6 +35,10 @@ Server URLs:
 - Health: `http://localhost:3000/health`
 - Swagger: `http://localhost:3000/docs`
 
+Client env:
+
+- `PUBLIC_BASE_URL` - external base URL used by UI for API requests, for example `https://qr.escalion.ru`
+
 ## Client Run
 
 Simplest way:
